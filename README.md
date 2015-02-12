@@ -5,6 +5,17 @@ Middleware to BasicAuth password protection to a site.
 Currently just supports a single username/password combination, and is
 either every url, or none.
 
+This is basically just a slight tweak to the snippet here:
+https://djangosnippets.org/snippets/2468/ by joshsharp. Just adds some
+settings and bundles it up into a package.
+
+TODO:
++ add option for a url regex to specify which urls require auth.
++ be able to set a list of usernames/password, possibly add the option
+  for this to look at a model, though this may be out of scope. Not
+  sure.
++ tests
+
 Getting Started
 ---------------
 
