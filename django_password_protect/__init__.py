@@ -1,1 +1,1 @@
-from .password_protect import PasswordProtect
+from .password_protect_middleware import PasswordProtectMiddleware

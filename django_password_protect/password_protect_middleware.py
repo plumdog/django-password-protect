@@ -8,7 +8,7 @@ PASSWORD_PROTECT_PASSWORD = getattr(settings, 'PASSWORD_PROTECT_PASSWORD', None)
 PASSWORD_PROTECT_REALM = getattr(settings, 'PASSWORD_PROTECT_REALM', 'Password Protected')
 
 
-class PasswordProtect(object):
+class PasswordProtectMiddleware(object):
     def process_request(self, request):
         if not PASSWORD_PROTECT:
             return
