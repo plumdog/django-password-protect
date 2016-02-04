@@ -1,37 +1,41 @@
 from django.http import HttpResponse
 from django.conf import settings
 
-import base64
-import django
+from django.utils.encoding import smart_bytes
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    from django.utils.encoding import smart_unicode as smart_text
 
-PASSWORD_PROTECT = getattr(settings, 'PASSWORD_PROTECT', True)
-PASSWORD_PROTECT_USERNAME = getattr(settings, 'PASSWORD_PROTECT_USERNAME', None)
-PASSWORD_PROTECT_PASSWORD = getattr(settings, 'PASSWORD_PROTECT_PASSWORD', None)
-PASSWORD_PROTECT_REALM = getattr(settings, 'PASSWORD_PROTECT_REALM', 'Password Protected')
+import base64
 
 
 class PasswordProtectMiddleware(object):
+    def __init__(self):
+        self.PASSWORD_PROTECT = getattr(settings, 'PASSWORD_PROTECT', True)
+        self.PASSWORD_PROTECT_USERNAME = getattr(settings, 'PASSWORD_PROTECT_USERNAME', None)
+        self.PASSWORD_PROTECT_PASSWORD = getattr(settings, 'PASSWORD_PROTECT_PASSWORD', None)
+        self.PASSWORD_PROTECT_REALM = getattr(settings, 'PASSWORD_PROTECT_REALM', 'Password Protected')
+
     def process_request(self, request):
-        if not PASSWORD_PROTECT:
+
+        if not self.PASSWORD_PROTECT:
             return
 
         if 'HTTP_AUTHORIZATION' in request.META:
-            authentication = request.META['HTTP_AUTHORIZATION']
+            authentication = smart_text(request.META['HTTP_AUTHORIZATION'], 'ascii')
             auth_method, auth_credentials = authentication.split(' ', 1)
+            auth_credentials = auth_credentials.strip()
+
             if auth_method.lower() == 'basic':
-                auth_credentials = base64.decodestring(auth_credentials.strip().encode('ascii')).decode('ascii')
+                auth_credentials = base64.decodestring(smart_bytes(auth_credentials)).decode('ascii')
                 username, password = auth_credentials.split(':', 1)
-                if (username == settings.PASSWORD_PROTECT_USERNAME) and \
-                   (password == settings.PASSWORD_PROTECT_PASSWORD):
+                if (username == self.PASSWORD_PROTECT_USERNAME) and \
+                   (password == self.PASSWORD_PROTECT_PASSWORD):
                     return
 
         html = "<html><title>Auth required</title><body><h1>Authorization Required</h1></body></html>"
-        if django.VERSION < (1, 5):
-            response_args = {'mimetype': 'text/html'}
-        else:
-            response_args = {'content_type': 'text/html'}
-
-        response = HttpResponse(html, **response_args)
-        response['WWW-Authenticate'] = 'Basic realm="{}"'.format(PASSWORD_PROTECT_REALM.replace('"', ''))
+        response = HttpResponse(html, content_type='text/html')
+        response['WWW-Authenticate'] = 'Basic realm="{}"'.format(self.PASSWORD_PROTECT_REALM.replace('"', ''))
         response.status_code = 401
         return response

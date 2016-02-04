@@ -9,4 +9,5 @@ setup(
     author_email='plummer574@gmail.com',
     url='https://github.com/plumdog/django-password-protect',
     description='Middleware to add BasicAuth password protection to a site',
-    install_requires=['Django'])
+    test_suite='tests',
+    install_requires=['Django', 'mock'])
