@@ -7,15 +7,13 @@ try:
     from django.utils.encoding import smart_text
 except ImportError:
     from django.utils.encoding import smart_unicode as smart_text
-
 from django_password_protect import PasswordProtectMiddleware
-
 # Some ordering-sensitive imports
 settings.configure(global_settings)
 if not django.VERSION < (1, 7):
     django.setup()
-from django.test import RequestFactory
-from django.test.utils import override_settings
+from django.test import RequestFactory  # noqa
+from django.test.utils import override_settings  # noqa
 
 
 class MiddlewareTest(TestCase):
